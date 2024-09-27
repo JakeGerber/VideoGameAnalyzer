@@ -79,19 +79,20 @@ print(response)
 
 
 # Function to add an item to the DynamoDB table using the client
-def add_entry_to_dynamodb(id: str, name: str, platform: str):
+def add_entry_to_dynamodb(id: str, name: str, console: str):
     response = dynamodbmodule.put_item(
         TableName='PriceTableTest',  # Table name here
         Item={
             'game_id': {'S': id},          # 'S' denotes that the type of the attribute is a string
             'name': {'S': name},
-            'platform': {'S': platform}
+            'console': {'S': console}
         }
     )
     return response
+#Maybe add release date and some other info
 
 # Example usage
-response = add_entry_to_dynamodb('ds', 'dfgsdf', 'POI')
+response = add_entry_to_dynamodb('8282882', 'Mario Galazy', 'Wii!')
 
 print(response)
 
