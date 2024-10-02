@@ -11,13 +11,56 @@ import csv
 
 import re
 
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+from selenium.webdriver.chrome.service import Service
 
-def getLinksForConsole(consoleLink):
+#This uses the link to my specific chromedriver
+def scrollToBottom(link):
+    service = Service(r'C:\Users\Jake\Desktop\Price Checker\Github-Repo\VideoGameAnalyzer\chromedriver.exe')
+
+    driver = webdriver.Chrome(service=service)
+
+    driver.get(r'https://www.pricecharting.com/console/nes')
+
+    last_height = driver.execute_script("return document.body.scrollHeight")
+
+    #Scrolls to bottom of webpage.
+    while True:
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        # Wait for new content to load
+        time.sleep(2)
+
+        # Calculate new scroll height and compare with last height
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            break
+        last_height = new_height
+
+    html = driver.page_source
+    driver.quit()
+
+    return html
+
+
+def getLinksForConsole(consoleLink, getEntirePage=True):
     print("Links:")
 
-    r = requests.get('https://www.pricecharting.com/console/nes')
+    #r = requests.get('https://www.pricecharting.com/console/nes')
 
-    soup = BeautifulSoup(r.content, 'html5lib')
+    html = ""
+    if getEntirePage:
+        html = scrollToBottom(consoleLink)
+    else:
+        r = requests.get(consoleLink)
+        html = r.content
+
+    
+
+
+    soup = BeautifulSoup(html, 'html5lib')
 
     
     product_rows = soup.find_all('tr', attrs={'data-product': True})
@@ -53,29 +96,31 @@ def getGameInformation(link):
     game_name = soup.find('h2').get_text(strip=True).replace(':', '')
     print(game_name)
 
-    #Need to strip out the system when in parenthesis and the details part.
+    #Need to strip out the console when in parenthesis and the details part.
     #Regex?
 
     game_name = game_name.removesuffix(") Details")
 
-    print(game_name)
+    #print(game_name)
 
-    system = ""
+    console = ""
 
     while(game_name[-1] != '('):
-        system += game_name[-1]
+        console += game_name[-1]
         game_name = game_name[:-1]
         print(game_name)
         #quit()
 
-    system = system[::-1]
+    console = console[::-1]
     game_name = game_name[:-2]
 
-    print("Game Name:", game_name)
-    print("System Name:", system)
+    #print("Game Name:", game_name)
+    #print("System Name:", console)
 
+    details["Game Name"] = game_name
+    details["Console"] = console
 
-    quit()
+    #quit()
 
     table = soup.find('table', id='attribute')
 
@@ -191,12 +236,16 @@ for links in product_links:
 
 '''
 
+#default without selenium it only gets first 50 results
 NES_links = getLinksForConsole(r'https://www.pricecharting.com/console/nes')
+
+print(len(NES_links))
+quit()
 
 
 allInformation_NES = []
 
-file1 = open(r"C:\Users\Jake\Desktop\Price Checker\Github-Repo\VideoGameAnalyzer\myfile.txt", "w")
+file1 = open(r"C:\Users\Jake\Desktop\Price Checker\Github-Repo\VideoGameAnalyzer\results.txt", "w")
 
 
 for l in NES_links:
