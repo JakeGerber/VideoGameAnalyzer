@@ -2,13 +2,22 @@ import os
 from rapidfuzz import fuzz, process
 
 
-folder_path = 'PS1-Tests'
+folder_path = 'NES'
 
 #Gets and prints all files in folder
 def get_files_in_folder(folder):
     try:
         files = os.listdir(folder)
-        return [file for file in files if os.path.isfile(os.path.join(folder, file))]
+        result = []
+
+        for file in files:
+            if os.path.isfile(os.path.join(folder, file)):
+                result.append(file.replace('_', ' '))
+        
+        return result
+
+
+        #return [file for file in files if os.path.isfile(os.path.join(folder, file))]
     except Exception as e:
         print(f"Error reading folder: {e}")
         return []
@@ -19,7 +28,7 @@ def fuzzy_search(files, test_string, threshold=70):
         query=test_string,
         choices=files,
         scorer=fuzz.partial_ratio,
-        score_cutoff=threshold  # Only return matches above this threshold
+        score_cutoff=threshold  #Only return matches above this threshold
     )
     return matches
 
@@ -29,7 +38,7 @@ files = get_files_in_folder(folder_path)
 #print("Files:", files)
 
 
-test = "WDL: World Destruction League - Thunder Tanks"
+test = "Galaga Demons of Death"
 
 matches = fuzzy_search(files, test)
 print("Fuzzy Matches:", matches)
