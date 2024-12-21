@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const ImageUpload = () => {
+const ImageUpload = ({ onUploadSuccess }) => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (event) => {
@@ -26,6 +26,15 @@ const ImageUpload = () => {
         },
       });
       console.log("Upload successful:", response.data);
+
+      console.log(response.data[0])
+
+      //response.data has everything
+      if (onUploadSuccess) {
+        onUploadSuccess(response.data); // Pass data back to parent
+      }
+
+
     } catch (error) {
       console.error("Error uploading file:", error);
     }
