@@ -1,5 +1,6 @@
 import os
 from rapidfuzz import fuzz, process
+import json
 
 
 folder_path = 'NES'
@@ -22,6 +23,20 @@ def get_files_in_folder(folder):
         print(f"Error reading folder: {e}")
         return []
     
+
+def get_json_names(json_path):
+    with open(json_path, 'r') as file:
+        data = json.load(file)
+
+    #game_titles = list(data.keys())
+    game_titles = list(data.keys())
+
+    print("Game Titles:")
+    print(game_titles)
+    return game_titles
+
+
+    
 def fuzzy_search(files, test_string, threshold=70):
     #Match test_string with each file using fuzz.partial_ratio
     matches = process.extract(
@@ -33,18 +48,23 @@ def fuzzy_search(files, test_string, threshold=70):
     return matches
 
 
+def search(game, console):
+    #files = get_files_in_folder(folder_path)
 
-files = get_files_in_folder(folder_path)
-#print("Files:", files)
+    #print("Files:", files)
 
 
-test = "Galaga Demons of Death"
+    #test = "Galaga Demons of Death"
 
-matches = fuzzy_search(files, test)
-print("Fuzzy Matches:", matches)
+    files = get_json_names("NES_Information.json")
 
-#What about special editions and such?
-if len(matches) > 0:
-    print("Matches Found")
-else:
-    print("ERROR: No matches found. Take a better photo(?)")
+    matches = fuzzy_search(files, game)
+    print("Fuzzy Matches:", matches)
+
+    #What about special editions and such?
+    if len(matches) > 0:
+        print("Matches Found")
+        return matches[0][0]
+    else:
+        print("ERROR: No matches found. Take a better photo(?)")
+        return None
