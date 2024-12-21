@@ -74,6 +74,10 @@ def getGameInformation(link, details, downloadCoverArtFolder):
     #Parse HTML
     soup = BeautifulSoup(response.text, 'html.parser')
 
+    if soup == None:
+        print("ERROR WITH: ", link, " - moving on")
+        return
+
     #Get game title and console.
     title = soup.find('h1', class_='chart_title').text.strip()
     title = title.split(" ")
@@ -90,8 +94,10 @@ def getGameInformation(link, details, downloadCoverArtFolder):
     if (coverImageLink == f"/images/no-image-available.png"):
         return
 
+    #eventually title should be replaced with the ID of the game
     details[title] = {}
-    details[title]["Game Console"] = gameConsole
+    details[title]["title"] = title
+    details[title]["game-console"] = gameConsole
 
 
     #Locally downloads Cover Arts
@@ -117,7 +123,7 @@ def getGameInformation(link, details, downloadCoverArtFolder):
 
         newPath = ""
         
-        details[title]["Cover Link"] = img_path
+        details[title]["cover-link"] = img_path
 
 
         print("path:", img_path)
@@ -129,6 +135,20 @@ def getGameInformation(link, details, downloadCoverArtFolder):
     else:
         print("Failed to download the image.")
 
+
+    table = soup.find(id="price_data")
+
+    rows = table.find_all("tr")
+
+    price_cells = rows[1].find_all("td")
+    details[title]["loose_price"] = price_cells[0].find("span", class_="price").text.strip()
+    details[title]["complete_price"] = price_cells[1].find("span", class_="price").text.strip()
+    details[title]["new_price"] = price_cells[2].find("span", class_="price").text.strip()
+    details[title]["graded_price"] = price_cells[3].find("span", class_="price").text.strip()
+    details[title]["box_only_price"] = price_cells[4].find("span", class_="price").text.strip()
+    details[title]["manual_only_price"] = price_cells[5].find("span", class_="price").text.strip()
+
+
     table = soup.find('table', id='attribute')
 
     for row in table.find_all('tr'):
@@ -136,7 +156,8 @@ def getGameInformation(link, details, downloadCoverArtFolder):
         details_cell = row.find('td', class_='details')
         
         if title_cell and details_cell:
-            titleC = title_cell.get_text(strip=True).replace(':', '')
+            titleC = title_cell.get_text(strip=True).replace(':', '').lower().replace(" ", "-").replace("-", "_")
+            
             print("----")
             print(title_cell)
             print("******")
@@ -160,6 +181,8 @@ def getGameInformation(link, details, downloadCoverArtFolder):
 
 NES_links = getLinksForConsole(r'https://www.pricecharting.com/console/nes', getAllLinks=True)
 
+#NES_links = [f"https://www.pricecharting.com/game/nes/commando-5-screw"]
+
 file_name = "NES_Information.json"
 
 allDetails = {}
@@ -171,6 +194,7 @@ with open(file_name, "w") as file:
     json.dump(allDetails, file, indent=4)
 
 
+'''
 PS1_links = getLinksForConsole(r'https://www.pricecharting.com/console/playstation', getAllLinks=True)
 
 file_name = "PS1_Information.json"
@@ -182,3 +206,17 @@ for gameLink in PS1_links:
     
 with open(file_name, "w") as file:
     json.dump(allDetails, file, indent=4)
+'''
+
+#Nintendo (Home Consoles):
+# nes, super-nintendo, nintendo-64, gamecube, wii, wii-u, nintendo-switch
+
+#Nintendo (Handhelds):
+# gameboy, gameboy-color, gameboy-advance, nintendo-ds, nintendo-3ds, virtual-boy, game-&-watch
+
+
+#Playstation (Home Consoles)
+# playstation, playstation-2, playstation-3, playstation-4, playstation-5
+
+#Playstation (Handhelds):
+# psp, playstation-vita
