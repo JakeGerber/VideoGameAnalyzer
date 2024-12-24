@@ -6,6 +6,7 @@ import json
 folder_path = 'NES'
 
 #Gets and prints all files in folder
+'''
 def get_files_in_folder(folder):
     try:
         files = os.listdir(folder)
@@ -13,7 +14,11 @@ def get_files_in_folder(folder):
 
         for file in files:
             if os.path.isfile(os.path.join(folder, file)):
-                result.append(file.replace('_', ' '))
+                fileSplit = file.split("|")
+                fileName = fileSplit[0]
+                fileConsole = fileSplit[1]
+                result.append(fileName.replace('_', ' ')+"|"+fileConsole)
+                print(result)
         
         return result
 
@@ -22,7 +27,7 @@ def get_files_in_folder(folder):
     except Exception as e:
         print(f"Error reading folder: {e}")
         return []
-    
+'''
 
 def get_json_names(json_path):
     with open(json_path, 'r') as file:
@@ -31,8 +36,8 @@ def get_json_names(json_path):
     #game_titles = list(data.keys())
     game_titles = list(data.keys())
 
-    print("Game Titles:")
-    print(game_titles)
+    #print("Game Titles:")
+    #print(game_titles)
     return game_titles
 
 
@@ -48,23 +53,54 @@ def fuzzy_search(files, test_string, threshold=70):
     return matches
 
 
-def search(game, console):
-    #files = get_files_in_folder(folder_path)
-
-    #print("Files:", files)
+def search(game, console, topN=None):
 
 
-    #test = "Galaga Demons of Death"
+    #This is inefficient to do everytime. I should cache this later so its only done once.
+    #files = get_json_names("combined.json")
 
-    files = get_json_names("NES_Information.json")
+    files = get_json_names(f"./Game-JSONs/{console}_Information.json")
 
-    matches = fuzzy_search(files, game)
+    gameTitles = set()
+    gameConsoles = set()
+
+    for f in files:
+        f = f.split("|")
+        gameTitles.add(f[0])
+        gameConsoles.add(f[1])
+
+
+    print("game: ", game)
+
+
+    matches = fuzzy_search(gameTitles, game)
     print("Fuzzy Matches:", matches)
 
     #What about special editions and such?
+    #has issues with not for resale versions (such as doing mario party 2 throws out the not for resale version)
+    #fuzzy search is saying that mario party and mario party 2 are 100% on the search.
+
+
     if len(matches) > 0:
         print("Matches Found")
-        return matches[0][0]
+
+        print("Matches Are: ", matches)
+        
+        returnMatches = []
+
+        matchesAdded = 0
+        for match in matches:
+            if (topN != None and matchesAdded < topN):
+                print(match[0] + "|" + console)
+                returnMatches.append(match[0] + "|" + console)
+                matchesAdded += 1
+            else:
+                break
+        
+        return returnMatches
+        #return matches[0][0]+ "|" + console
     else:
         print("ERROR: No matches found. Take a better photo(?)")
         return None
+
+
