@@ -12,6 +12,9 @@ with open('combined.json', 'r') as file:
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('price-analyzer-complete-2')
 
+#plan : before putting things into database, if you want to use online storage, upload
+#the images in gamecoverlink to s3 bucket and update the link
+
 for key, game in data.items():
     print("key: ", key)
     print("game: ", game["game-console"])
