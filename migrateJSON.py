@@ -4,66 +4,24 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
 
-# Load the JSON data
-#with open('combined.json', 'r') as file:
+#Load the JSON data
 with open('combined.json', 'r') as file:
     data = json.load(file)
 
-# Initialize the DynamoDB client
+#Initialize the DynamoDB client
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('price-analyzer-complete')
-
-#print(table)
-
-testx = table.scan(
-FilterExpression=Attr('game_id').eq('Mario Party 8|wii')
-)
-print(testx)
-quit()
-
-#-----------------
-with open('dynamodb_items.json', 'w') as file:
-    # Scan the table and handle pagination
-    response = table.scan()
-
-    # Write items from the first page to the file
-    for item in response['Items']:
-        json.dump(item, file)
-        file.write('\n')  # Write each item on a new line
-    
-    # If there are more items, continue scanning and writing
-    while 'LastEvaluatedKey' in response:
-        # Get the next set of results
-        response = table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
-
-        # Write the items to the file
-        for item in response['Items']:
-            json.dump(item, file)
-            file.write('\n')  # Write each item on a new line
-
-print("Data written to 'dynamodb_items.json'")
-
-#-----------------
-
-
-
-#print(testx)
-quit()
-
-#Uncomment since this working
+table = dynamodb.Table('price-analyzer-complete-2')
 
 for key, game in data.items():
     print("key: ", key)
     print("game: ", game["game-console"])
-
-        
     
     try:
         table.put_item(
             Item={
-                "game_id": key,  # Partition key
-                "console": game["game-console"],  # Sort key
-                **{k: v for k, v in game.items() if k != "game-console"}  # Additional attributes
+                "game_id": key,  #Partition key
+                "console": game["game-console"],  #Sort key
+                **{k: v for k, v in game.items() if k != "game-console"}  #Other Information
             }
         )
         print(f"Successfully added key: {key}, game: {game['game-console']} to the table.")
@@ -72,7 +30,7 @@ for key, game in data.items():
     except Exception as e:
         print(f"Error adding key: {key}, game: {game['game-console']} to the table. Error: {str(e)}")
         print("Press Enter to continue...")
-        input()  # Waits until the Enter key is pressed
+        input()
 
 
 
@@ -97,24 +55,9 @@ except Exception as e:
 
 
 
-
-#print(table.scan())
-#quit()
-
-#----------
-
-'''
-response = table.scan(
-    FilterExpression=Attr('game_id').eq('Blue Marlin|nes')
-)
-
-# Print the results
-for item in response['Items']:
-    print(item)
-'''
-
-
 quit()
+
+#WIP for uploading files to the S3 bucket.
 
 s3 = boto3.resource('s3')
 bucket = s3.Bucket('price-test-real')
