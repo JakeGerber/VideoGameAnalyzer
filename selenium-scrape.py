@@ -217,7 +217,7 @@ for console in consoles:
     file_name = f"./Game-JSONs/{console}_Information.json"
 
     if (os.path.exists(f"./Game-JSONs/{console}_Information.json") and recreate_JSON_if_exists == False):
-        print("WOW IT EXISTS!")
+        print("FILE EXISTS, moving on!")
         continue
 
     console_links = getLinksForConsole(fr'https://www.pricecharting.com/console/{console}', getAllLinks=True)
