@@ -34,6 +34,15 @@ from boto3.dynamodb.conditions import Key, Attr
 
 from dotenv import load_dotenv
 
+from rapidfuzz import fuzz, process
+
+import difflib
+
+#from fuzzywuzzy import fuzz
+#from fuzzywuzzy import process
+
+
+
 #maybe verify result with regex
 
 def json_to_txt(json_path):
@@ -47,10 +56,6 @@ def json_to_txt(json_path):
     allKeys.add(k.split("|")[0])
 
   return '\n'.join(f"{key}\n{key}" for key in allKeys)
-
-
-
-
 
 # Function to encode the image
 def encode_image(image_path):
@@ -80,30 +85,6 @@ def connectToAI(image_path):
 
   #If i wanted to add support for pictures of multiple games at a time, I would probably ask for format and identify the amount of
   #games in the image and what they are
-
-
-  #old working version but it doesnt take in the text file
-  '''
-  completion = client.chat.completions.create(
-    model = "gpt-4o-mini",
-    messages = [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": [
-          {
-            "type": "text",
-            "text": "What single video game is this and what console was it on? Give it to me in the format Game:game|Console:console (if there is no game found or error then result with Game:unknown|Console:unknown). If the console is a Nintendo Entertainment System, list it as nes. If the console is a Super Nintendo Entertainment System, list it as super-nintendo. If the console is a Nintendo 64, list it as nintendo-64. Make the game name normal (for example Super Mario 64 should be Super Mario 64 and not super-mario-64), and make sure there no spaces after the : characters.",
-          },
-          {
-            "type": "image_url",
-            "image_url": {
-              "url":  f"data:image/{extension};base64,{base64_image}"
-            },
-          },
-        ],
-  },
-    ]
-  )
-  '''
 
   #update completion to include more consoles.
   image_url = f"data:image/{extension};base64,{base64_image}"
@@ -138,7 +119,7 @@ def connectToAI(image_path):
   #allGamesForConsole = json_to_txt(f"./Game-JSONs/{completion.choices[0].message.content.strip()}_Information.json")
 
   dynamodb = boto3.resource('dynamodb')
-  table = dynamodb.Table('price-analyzer-complete')
+  table = dynamodb.Table('price-game-1')
 
   #allGamesForConsole_dynamoDB = table.scan(
   #  FilterExpression=Attr('console').eq(console)
@@ -192,6 +173,8 @@ def connectToAI(image_path):
 
   allGamesForConsole = "\n".join(game["title"] for game in allGamesForConsole_dynamoDB)
 
+  print(allGamesForConsole)
+
 
   #print("ALL GAMES FOR CONSOLE: ", allGamesForConsole_dynamoDB)
 
@@ -204,6 +187,12 @@ def connectToAI(image_path):
 #maybe say to not match with not for resale versions if possible and match with special versions when applicable otherwise use the base version of the game
 
 
+#NOTE: LEGEND OF ZELDA IS NOT WORKING
+#its thinking its The Legend of Zelda
+#maybe I should implement a fuzzy search to avoid this...
+
+#Sometimes Super Mario Bros is given a period at the end which messes everything up. This only sometimes happens.
+
   completion = client.chat.completions.create(
     model = "gpt-4o-mini",
     messages = [
@@ -211,7 +200,8 @@ def connectToAI(image_path):
         {"role": "user", "content": [
             {
                 "type": "text",
-                "text": "Print out the single game from this text file that is most likely to be the actual game. When possible include only the game and not any versions that may contain extra items or are not for resale. Print it out exactly how it is in the text and nothing else. It MUST be printed the exact way it is in the text (no extra characters).",
+                #"text": "Print out the single game from this text file that is most likely to be the actual game. When possible include only the game and not any versions that may contain extra items or are not for resale. Print it out exactly how it is in the text and nothing else. It MUST be printed the exact way it is in the text (no extra characters).",
+                "text": "Identify and print the single game name from this text file that is most likely the main game. Exclude any versions with extra items, promotional copies, or 'not for resale' labels. Print the game name exactly as it appears in the text, without adding or altering any characters. Do not add any extra flavor text.",
             },
             {
                 "type": "image_url",
@@ -232,21 +222,54 @@ def connectToAI(image_path):
 
   gameItself = completion.choices[0].message.content.strip()
 
+  print("))))))))))))")
+  #print(allGamesForConsole_dynamoDB["Super Mario Bros|nes"])
+
+  file_name = "all_games.txt"
+
+  # Write the list to the file
+  with open(file_name, "w") as file:
+      for game in allGamesForConsole:
+          file.write(game + "\n")
+
+  print(f"All games written to {file_name}")
+
+
+
+  print("^^^^^^^^^^^^^^^^^")
+
+  if gameItself.lower() not in allGamesForConsole.lower().split("\n"):
+    print("THE GAME: ", gameItself)
+    #difflib better for basically exact matches, whereas fuzzywuzzy deals better with typos
+    match = difflib.get_close_matches(gameItself, allGamesForConsole.split("\n"), n=1)
+    print("Fuzzy Matches:", match)
+    if match:
+       gameItself = match[0]
+    else:
+       print("HELP FIX THID!!")
+  else:
+     print("IT HERE!!")
+
+
 
   print("-------")
   print("Console: ", console, " - Game Itself: ", gameItself)
 
-  result = completion.choices[0].message.content.strip().split("|")
+  #result = completion.choices[0].message.content.strip().split("|")
 
-  result = {"Game":gameItself, "Console":console}
+  #result = {"Game":gameItself, "Console":console}
 
   print("**************************")
 
   print(gameItself+"|"+console)
 
+  completeGame = (gameItself+"|"+console).lower()
+
 #  result = table.scan(
 #    FilterExpression=Attr('game_id').eq(gameItself+"|"+console)
 #  )
+
+
 
 
 #https://stackoverflow.com/questions/46617575/python-dynamodb-scan-operation-not-return-all-records
@@ -261,12 +284,16 @@ def connectToAI(image_path):
       # Perform the scan
       if last_evaluated_key:
           response = table.scan(
-              FilterExpression=Attr('game_id').eq(gameItself+"|"+console),
+              #FilterExpression=Attr('game_id').eq(gameItself+"|"+console),
+              FilterExpression=Attr('game_id').eq(completeGame),
+
               ExclusiveStartKey=last_evaluated_key
           )
       else:
           response = table.scan(
-              FilterExpression=Attr('game_id').eq(gameItself+"|"+console)
+              #FilterExpression=Attr('game_id').eq(gameItself+"|"+console)
+              FilterExpression=Attr('game_id').eq(completeGame)
+
           )
 
       # Add the results to the list
