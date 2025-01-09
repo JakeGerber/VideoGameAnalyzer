@@ -72,6 +72,7 @@ const Camera = ({ onCapture }) => {
         videoConstraints={videoConstraints}
       />
       <button onClick={capturePhoto}>Capture</button>
+
       <button onClick={() => setUrl(null)}>Refresh</button>
       {url && (
         <div>

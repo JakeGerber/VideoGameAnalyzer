@@ -1,29 +1,141 @@
-import logo from './logo.svg';
-import './App.css';
-import ImageUpload from './ImageUpload';
-import Card from './Card';
-import { useState } from 'react';
-import "./CardList.css"
-import axios from 'axios';
+import logo from "./logo.svg";
+import "./App.css";
+import ImageUpload from "./ImageUpload";
+import Card from "./Card";
+import { useState, useEffect } from "react";
+import "./CardList.css";
+import axios from "axios";
 
-import Camera from './Camera';
+import Camera from "./Camera";
+
+import { v4 as uuidv4 } from 'uuid';
+
+import LeafletMap from "./LeafletMap";
 
 function App() {
 
-  const [cards, setCards] = useState([])
-  const [uploadedImage, setUploadedImage] = useState(null);
+  //cards variable keeps track of the Cards which contain game Information
+  const [cards, setCards] = useState(() => {
+    //Initialize cards with localStorage if available
+    const savedCards = localStorage.getItem('cards');
+    if (savedCards)
+    {
+      return JSON.parse(savedCards)
+    }
+    else
+    {
+      return []
+    }
+  });
+
+  //Save cards to localStorage whenever cards changes
+  useEffect(() => {
+    localStorage.setItem('cards', JSON.stringify(cards));
+  }, [cards]);
+
   const [photoUrl, setPhotoUrl] = useState(null);
+
+  const [textBoxEntry, setTextBoxEntry] = useState("")
+  const [selectedConsole, setSelectedConsole] = useState("nes")
+
+  const [searchResult, setSearchResult] = useState([])
+
+  const handleClickSearchResult = async (item) => {
+    alert(`You selected: ${item}`); // Replace with your desired action
+    //setSearchQuery(""); // Optional: Clear the search
+    setTextBoxEntry("")
+    setSearchResult([]); // Optional: Hide the result boxes
+  
+  
+      try {
+        // Create a FormData object
+        const formData = new FormData();
+        
+        // Append the plain text to the form data
+        formData.append("text", item);  
+      
+        // Make the POST request
+        const response = await axios.post(
+          "http://127.0.0.1:5000/upload_title",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      
+        // Handle the successful upload
+        console.log("Upload successful:", response.data);
+        // handleUploadTextSuccess(response.data);
+        addNewCard(response.data[item]);
+      } catch (error) {
+        console.error("Error uploading file:", error);
+      }
+  
+
+
+  };
+
+
+  const handleSelectedConsole = (event) => {
+    setSelectedConsole(event.target.value);
+  };
+
+  const newTextEntered = (event) => {
+    setTextBoxEntry(event.target.value)
+  }
 
   const handleCapture = (url) => {
     console.log("Captured URL:", url);
     setPhotoUrl(url);
-    console.log("ITS SET: ", url)
+    console.log("ITS SET: ", url);
   };
 
   const uploadCameraCapture = () => {
     console.log("Captured URL:", photoUrl);
-  }
+  };
 
+  const handleTextUpload = async () => {
+    if (textBoxEntry == "")
+    {
+      alert("Please enter text!");
+      return;
+    }
+
+
+
+    try {
+      // Create a FormData object
+      const formData = new FormData();
+      
+      // Append the plain text to the form data
+      formData.append("text", textBoxEntry);
+      formData.append("console", selectedConsole);
+
+    
+      // Make the POST request
+      const response = await axios.post(
+        "http://127.0.0.1:5000/upload_text",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    
+      // Handle the successful upload
+      console.log("Upload successful:", response.data);
+      handleUploadTextSuccess(response.data);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+    
+
+
+
+  }
 
   const handleUploadCapture = async () => {
     if (!photoUrl) {
@@ -31,51 +143,51 @@ function App() {
       return;
     }
 
-    console.log(photoUrl)
-    
+    console.log(photoUrl);
+
     const base64ToBlob = (base64) => {
       const byteString = atob(base64.split(",")[1]); // Decode base64
       const mimeString = base64.split(",")[0].split(":")[1].split(";")[0]; // Extract MIME type
       const byteArray = new Uint8Array(byteString.length);
-  
+
       for (let i = 0; i < byteString.length; i++) {
         byteArray[i] = byteString.charCodeAt(i);
       }
-  
+
       return new Blob([byteArray], { type: mimeString });
     };
-  
+
     const imageBlob = base64ToBlob(photoUrl);
-  
+
     const formData = new FormData();
     formData.append("image", imageBlob, "image.jpg");
-  
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:5000/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       console.log("Upload successful:", response.data);
 
-      handleUploadSuccess(response.data)
-
-
-
+      handleUploadSuccess(response.data);
     } catch (error) {
       console.error("Error uploading file:", error);
     }
   };
 
-
   //complete_price, genre, esrb_rating, publisher, developer
 
   const addNewCard = (data) => {
     const newCard = {
-      id: cards.length + 1,
+      id: `${uuidv4()}`,
       title: `${data.title}`,
-      image: "https://via.placeholder.com/150",
+      //image: "https://via.placeholder.com/150",
+      image: `${data["cover-link"]}`,
       description: `${data.description}`,
       release_date: `${data["release_date"]}`,
       loose_price: `${data["loose_price"]}`,
@@ -85,24 +197,33 @@ function App() {
       publisher: `${data["publisher"]}`,
       developer: `${data["developer"]}`,
     };
-    setCards([...cards, newCard])
-  }
+    setCards([...cards, newCard]);
+  };
 
+
+  const handleUploadTextSuccess = (responseData) => {
+    console.log("RESPONSE DATA!: ", responseData);
+    setSearchResult(responseData.text)
+    console.log("wow")
+    console.log(searchResult)
+  }
 
   const handleUploadSuccess = (responseData) => {
     // Assuming imageData contains the URL of the uploaded image
     //setUploadedImage(imageData.imageUrl); // Update state with uploaded image URL
-    console.log("DATA: ", responseData)
-    console.log("e", typeof(responseData))
-    console.log("Title: ", responseData.title)
+    console.log("DATA: ", responseData);
+    console.log("e", typeof responseData);
+    console.log("Title: ", responseData.title);
 
     for (const key in responseData) {
       if (responseData.hasOwnProperty(key)) {
-          console.log("KEY IS: ", key)
-          const value = responseData[key];
-          console.log(`${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`);
+        console.log("KEY IS: ", key);
+        const value = responseData[key];
+        console.log(
+          `${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`
+        );
       }
-  }
+    }
     for (const key in responseData) {
       if (responseData.hasOwnProperty(key)) {
         addNewCard(responseData[key]); // Create new card with uploaded image
@@ -110,29 +231,35 @@ function App() {
     }
   };
 
-//genre, esrb_rating, publisher, developer
+  const handleDeleteCard = (id) => {
+    setCards((prevCards) => prevCards.filter((card) => card.id !== id));
+  };
+
+
+  //genre, esrb_rating, publisher, developer
+  
+
+  //add search bar with fuzzy search?
+  //fuze?
 
   return (
     <div className="App">
       <header className="App-header">
-
-      <Camera onCapture={handleCapture} />
-      <button onClick={handleUploadCapture}>THIS IS FOR SUBMITTING PHOTO CAPTURE</button>
-
+        <Camera onCapture={handleCapture} />
+        <button onClick={handleUploadCapture}>
+          THIS IS FOR SUBMITTING PHOTO CAPTURE
+        </button>
 
         <ImageUpload onUploadSuccess={handleUploadSuccess} />
 
-        
-        
-
-
         <div className="card-list">
-        {cards.map((card) => (
-              <Card 
-              key={card.id} 
-              title={card.title} 
-              image={card.image} 
-              description={card.description} 
+          {cards.map((card) => (
+            <Card
+              key={card.id}
+              id={card.id}
+              title={card.title}
+              image={card.image}
+              description={card.description}
               release_date={card.release_date}
               loose_price={card.loose_price}
               complete_price={card.complete_price}
@@ -140,10 +267,83 @@ function App() {
               esrb_rating={card.esrb_rating}
               publisher={card.publisher}
               developer={card.developer}
+              onDelete = {() => handleDeleteCard(card.id)}
             />
-        ))}
+          ))}
+        </div>
+
+        <h1>Testing Features:</h1>
+
+        <input type="text" value={textBoxEntry} onChange={newTextEntered} />
+
+        <h1>{textBoxEntry}</h1>
+
+
+
+
+
+        {searchResult && searchResult.length > 0 && (
+        <div
+          style={{
+            top: "45px",
+            left: "0",
+            width: "300px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            zIndex: 1000,
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          {searchResult.map((item, index) => (
+            <div
+              key={index}
+              onClick={() => handleClickSearchResult(item)}
+              style={{
+                padding: "10px",
+                cursor: "pointer",
+                borderBottom:
+                  index !== searchResult.length - 1
+                    ? "1px solid #eee"
+                    : "none",
+                hover: { backgroundColor: "#f0f0f0" },
+              }}
+            >
+              {item.replace('|', ' - ')}
+            </div>
+          ))}
+          </div>
+        )}
+
+
+
+
+
+        {/*I need to have some sort of dropdown to allow users to select the console*/}
+        {/*The issue is that the list will get very long very fast*/}
+
+        <div className="form-item">
+      <label className="label">
+        Console:
+        <select
+          name="console"
+          value={selectedConsole}
+          onChange={handleSelectedConsole}
+        >
+          <option value="nes">NES</option>
+          <option value="super-nintendo">Super Nintendo</option>
+          <option value="nintendo-64">Nintendo 64</option>
+          <option value="playstation">PlayStation</option>
+        </select>
+      </label>
     </div>
 
+
+        <button onClick={handleTextUpload}>Submit textboxentry</button>
+
+        <div>
+        <h1>Leaflet Map Example</h1>
+        <LeafletMap />
+      </div>
 
 
       </header>
@@ -152,3 +352,23 @@ function App() {
 }
 
 export default App;
+
+
+/*
+      <div class="form-item">
+        <label class="label">
+          Importance:
+          <select
+            name="importance"
+            value={formData.importance}
+            onChange={handleChange}
+          >
+            <option value="none">None</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+      </div>
+
+*/
