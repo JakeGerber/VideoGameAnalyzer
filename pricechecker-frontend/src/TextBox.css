@@ -1,0 +1,27 @@
+.professional-input {
+    padding: 12px 20px;
+    border-radius: 30px;
+    border: 2px solid #4a90e2; /* Soft blue for a professional look */
+    background-color: #f4f8fb; /* Light grayish-blue background */
+    font-size: 16px;
+    font-family: 'Helvetica Neue', sans-serif;
+    color: #333; /* Darker text color for contrast */
+    transition: all 0.3s ease;
+    outline: none;
+    text-align: center; /* Centers the text */
+    width: 100%;
+    max-width: 300px; /* Optional: limit width for a more contained look */
+    margin: 0 auto; /* Optional: center the input on the page */
+  }
+  
+  .professional-input:focus {
+    border-color: #0078d4; /* Slightly darker blue on focus */
+    background-color: #fff; /* White background when focused */
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.4); /* Soft shadow */
+  }
+  
+  .professional-input::placeholder {
+    color: #7b8d9e; /* Light gray color for placeholder */
+    opacity: 0.8;
+  }
+  

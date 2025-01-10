@@ -137,11 +137,11 @@ const App = () => {
       <IconList onIconSelect={handleIconSelect} />
       <div className="form-item">
         <label className="label">
-          Console:
           <select
             name="console"
             value={selectedConsole}
             onChange={handleSelectedConsole}
+            className="select-input"
           >
             {consoleOptions.map((console, index) => (
               <option key={index} value={console.value}>

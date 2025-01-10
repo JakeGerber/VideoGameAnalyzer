@@ -5,6 +5,8 @@ import Card from "./Card";
 import { useState, useEffect } from "react";
 import "./CardList.css";
 import "./CircleIcon.css"
+import "./TextBox.css"
+import "./SubmitButton.css"
 import axios from "axios";
 
 import Camera from "./Camera";
@@ -273,18 +275,13 @@ function App() {
 
         <h1>Search By Title:</h1>
 
-        <img src="/images/atari_icon.png"/>
+        <input type="text" value={textBoxEntry} onChange={newTextEntered} className="professional-input" placeholder="Type something..."/>
 
-        <a href="javascript:void(0);" class="circle-icon" id="toggle-icon">
-          <img src="/images/atari_icon.png" alt="Atari Icon" />
-        </a>
 
         <IconList />
 
 
-        <input type="text" value={textBoxEntry} onChange={newTextEntered} />
 
-        <h1>{textBoxEntry}</h1>
 
 
 
@@ -346,7 +343,7 @@ function App() {
     </div>
 
 
-        <button onClick={handleTextUpload}>Submit textboxentry</button>
+        <button onClick={handleTextUpload} className="submit-button">Submit textboxentry</button>
 
         <div>
         <h1>Leaflet Map Example</h1>

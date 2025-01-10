@@ -1,0 +1,36 @@
+.submit-button {
+    padding: 12px 30px;
+    font-size: 16px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 600;
+    border: none;
+    border-radius: 5px;
+    background-color: #0078d4; /* Soft blue color */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    outline: none;
+    box-shadow: 0 4px 6px rgba(0, 120, 212, 0.3); /* Subtle shadow */
+  }
+  
+  .submit-button:hover {
+    background-color: #005fa3; /* Darker blue on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+  }
+  
+  .submit-button:active {
+    background-color: #004b87; /* Even darker blue when clicked */
+    transform: translateY(0); /* Reset the lift effect when clicked */
+  }
+  
+  .submit-button:focus {
+    box-shadow: 0 0 8px rgba(0, 120, 212, 0.6); /* Blue outline when focused */
+  }
+  
+  .submit-button:disabled {
+    background-color: #d6e3f0; /* Light gray background for disabled state */
+    color: #a1b4cc; /* Light gray text */
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
