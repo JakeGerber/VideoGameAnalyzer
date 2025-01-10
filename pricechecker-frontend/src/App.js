@@ -4,6 +4,7 @@ import ImageUpload from "./ImageUpload";
 import Card from "./Card";
 import { useState, useEffect } from "react";
 import "./CardList.css";
+import "./CircleIcon.css"
 import axios from "axios";
 
 import Camera from "./Camera";
@@ -11,6 +12,8 @@ import Camera from "./Camera";
 import { v4 as uuidv4 } from 'uuid';
 
 import LeafletMap from "./LeafletMap";
+
+import IconList from "./IconList";
 
 function App() {
 
@@ -41,43 +44,36 @@ function App() {
   const [searchResult, setSearchResult] = useState([])
 
   const handleClickSearchResult = async (item) => {
-    alert(`You selected: ${item}`); // Replace with your desired action
-    //setSearchQuery(""); // Optional: Clear the search
+    //alert(`You selected: ${item}`);
     setTextBoxEntry("")
-    setSearchResult([]); // Optional: Hide the result boxes
+    setSearchResult([]);
   
-  
-      try {
-        // Create a FormData object
-        const formData = new FormData();
-        
-        // Append the plain text to the form data
-        formData.append("text", item);  
+    try {
+      //Create a FormData object
+      const formData = new FormData();
       
-        // Make the POST request
-        const response = await axios.post(
-          "http://127.0.0.1:5000/upload_title",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-      
-        // Handle the successful upload
-        console.log("Upload successful:", response.data);
-        // handleUploadTextSuccess(response.data);
-        addNewCard(response.data[item]);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-      }
-  
-
-
+      //Append text to form data
+      formData.append("text", item);  
+    
+      //Make post request to backend.
+      const response = await axios.post(
+        "http://127.0.0.1:5000/upload_title",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    
+      console.log("Upload successful:", response.data);
+      addNewCard(response.data[item]);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
   };
 
-
+  //Select console from list
   const handleSelectedConsole = (event) => {
     setSelectedConsole(event.target.value);
   };
@@ -276,6 +272,15 @@ function App() {
         </div>
 
         <h1>Search By Title:</h1>
+
+        <img src="/images/atari_icon.png"/>
+
+        <a href="javascript:void(0);" class="circle-icon" id="toggle-icon">
+          <img src="/images/atari_icon.png" alt="Atari Icon" />
+        </a>
+
+        <IconList />
+
 
         <input type="text" value={textBoxEntry} onChange={newTextEntered} />
 
