@@ -183,7 +183,7 @@ def upload_title():
         if useLocalJSON:
             return jsonify(retrieveJSON_data(text, f"./Game-JSONs/{text.split("|")[-1]}_Information.json")), 200
         else:
-            print("Need to add database support here")
+            #This uses dynamodb database
             return jsonify(retrieve_dynamodb_data(text)), 200
             
 

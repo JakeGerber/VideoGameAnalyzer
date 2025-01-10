@@ -1,5 +1,5 @@
 import boto3
-import textract_wrapper
+#import textract_wrapper
 
 import difflib
 

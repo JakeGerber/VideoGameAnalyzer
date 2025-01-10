@@ -40,7 +40,6 @@ const Card = ({ id, title, image, description, release_date, loose_price, comple
       <img src={image} alt={title} className="card-img" />
       <div className="card-content">
         <h2 className="card-title">{title}</h2>
-        <h3 className="card-description">id: {id}</h3>
         <h3 className="card-description">Loose Price: {loose_price}</h3>
         <h3 className="card-description">Complete Price: {complete_price}</h3>
         <h3 className="card-description">Release Date: {release_date}</h3>

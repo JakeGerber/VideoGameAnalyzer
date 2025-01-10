@@ -11,6 +11,11 @@ with open('combined.json', 'r') as file:
     data = json.load(file)
 
 
+#dynamodb = boto3.resource('dynamodb')
+#table = dynamodb.Table('price-game-1')
+
+#print(table.scan())
+
 #quit()
 
 #WIP for uploading files to the S3 bucket.
@@ -19,7 +24,7 @@ with open('combined.json', 'r') as file:
 s3 = boto3.resource('s3')
 bucket = s3.Bucket('price-test-real')
 
-print(bucket)
+#print(bucket)
 
 for key, game in data.items():
     try:
@@ -27,13 +32,15 @@ for key, game in data.items():
         print("game: ", game["cover-link"])
         file_path = game["cover-link"]
         _, file_extension = os.path.splitext(file_path)
-        object_name = file_path.split("\\")[-1]
+        object_name = file_path.split("\\")[-1] + "|" + game["game-console"]
         bucket_name = "price-test-real"
 
 
-
+        print("----+")
+        print(game["game-console"])
         print("!: ", file_extension)
         print("#: ", object_name)
+        print("----=")
 
 
         bucket.upload_file(file_path, object_name, ExtraArgs={'ContentType': file_extension})
@@ -49,11 +56,14 @@ for key, game in data.items():
 
         game["cover-link"] = file_url
 
+        print(file_url)
+
 
     except Exception as e:
         print(e)
 
-
+#print("WOW")
+#quit()
 
 
 #Initialize the DynamoDB client

@@ -1,6 +1,8 @@
 #https://platform.openai.com/docs/guides/vision
 #Need to pass images into OpenAI using base64
 
+#Need to add env for dynamodb database instead of putting it here each time.
+
 '''
 Plan!:
 

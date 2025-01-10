@@ -9,7 +9,7 @@ import difflib
 
 
 
-folder_path = 'NES'
+#folder_path = 'NES'
 
 #Gets and prints all files in folder
 '''
@@ -170,6 +170,11 @@ def search(game, console, topN=None, useLocalJSON=False):
         print("WOW")
 
         #fuzzywuzzy and difflib are the two posibilities
+    
+        #CHANGE THIS SO FUZZY WUZZY IS THE FALLBACK
+        #IF I PUT zelda in the things for instance it doesnt work with difflib
+
+
         useFuzzyWuzzy = False
         if useFuzzyWuzzy:
             if len(matches) > 0:

@@ -252,6 +252,9 @@ function App() {
 
         <ImageUpload onUploadSuccess={handleUploadSuccess} />
 
+        <img src="/images/camera.png" alt="Example" className="card-img" />
+
+
         <div className="card-list">
           {cards.map((card) => (
             <Card
@@ -272,7 +275,7 @@ function App() {
           ))}
         </div>
 
-        <h1>Testing Features:</h1>
+        <h1>Search By Title:</h1>
 
         <input type="text" value={textBoxEntry} onChange={newTextEntered} />
 
