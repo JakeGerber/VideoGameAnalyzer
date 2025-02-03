@@ -1,12 +1,12 @@
 .circle-icon {
     display: inline-block;
-    width: 100px; /* Adjust size as needed */
+    width: 100px;
     height: 100px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid transparent; /* Default border */
+    border: 2px solid transparent;
     text-decoration: none;
-    transition: border-color 0.3s ease; /* Smooth transition */
+    transition: border-color 0.3s ease; 
   }
   
   .circle-icon img {
@@ -15,8 +15,7 @@
     object-fit: cover;
   }
   
-  /* Selected state */
   .circle-icon.selected {
-    border-color: #007BFF; /* Outline color when selected */
+    border-color: #007BFF;
   }
   

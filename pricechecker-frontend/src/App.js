@@ -252,27 +252,6 @@ function App() {
 
         <img src="/images/camera.png" alt="Example" className="card-img" />
 
-
-        <div className="card-list">
-          {cards.map((card) => (
-            <Card
-              key={card.id}
-              id={card.id}
-              title={card.title}
-              image={card.image}
-              description={card.description}
-              release_date={card.release_date}
-              loose_price={card.loose_price}
-              complete_price={card.complete_price}
-              genre={card.genre}
-              esrb_rating={card.esrb_rating}
-              publisher={card.publisher}
-              developer={card.developer}
-              onDelete = {() => handleDeleteCard(card.id)}
-            />
-          ))}
-        </div>
-
         <h1>Search By Title:</h1>
 
         <input type="text" value={textBoxEntry} onChange={newTextEntered} className="professional-input" placeholder="Type something..."/>
@@ -345,7 +324,30 @@ function App() {
 
         <button onClick={handleTextUpload} className="submit-button">Submit textboxentry</button>
 
+
+        <div className="card-list">
+          {cards.map((card) => (
+            <Card
+              key={card.id}
+              id={card.id}
+              title={card.title}
+              image={card.image}
+              description={card.description}
+              release_date={card.release_date}
+              loose_price={card.loose_price}
+              complete_price={card.complete_price}
+              genre={card.genre}
+              esrb_rating={card.esrb_rating}
+              publisher={card.publisher}
+              developer={card.developer}
+              onDelete = {() => handleDeleteCard(card.id)}
+            />
+          ))}
+        </div>
+
         <div>
+
+          
         <h1>Leaflet Map Example</h1>
         <LeafletMap />
       </div>
@@ -357,23 +359,3 @@ function App() {
 }
 
 export default App;
-
-
-/*
-      <div class="form-item">
-        <label class="label">
-          Importance:
-          <select
-            name="importance"
-            value={formData.importance}
-            onChange={handleChange}
-          >
-            <option value="none">None</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </label>
-      </div>
-
-*/
